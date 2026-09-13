@@ -9,9 +9,11 @@ import {
   Coins,
   Copy,
   FileCode,
+  Globe,
   LayoutDashboard,
   LogOut,
   Menu,
+  Moon,
   Network,
   Repeat,
   ShieldCheck,
@@ -31,6 +33,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useExplorer, View } from "./store";
 import { Coin, HexGlyph, OperativeDot } from "./bits";
+import { LANGS } from "@/lib/i18n";
 
 interface NavItem {
   id: View;
@@ -57,14 +60,14 @@ export const NAV: NavItem[] = [
 /* ------------------------------- header ----------------------------- */
 
 export function SiteHeader() {
-  const { view, go, wallet, toggleWallet, watchlist } = useExplorer();
+  const { view, go, wallet, toggleWallet, watchlist, theme, toggleTheme, lang, setLang, t } = useExplorer();
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const items = NAV.filter((i) => !i.requiresWallet || wallet);
 
   const copyAddress = () => {
     if (!wallet) return;
     navigator.clipboard?.writeText(wallet).catch(() => {});
-    toast({ title: "Address copied", description: `${wallet.slice(0, 6)}...${wallet.slice(-4)} · QFS Polygon` });
+    toast({ title: t("Copy address"), description: `${wallet.slice(0, 6)}...${wallet.slice(-4)} · QFS Polygon` });
   };
 
   return (
@@ -84,7 +87,7 @@ export function SiteHeader() {
           <Coin size={38} />
           <span className="leading-tight">
             <span className="block whitespace-nowrap text-[17px] font-bold text-white">QFS Explorer</span>
-            <span className="hidden whitespace-nowrap text-[11px] text-cyan-400/90 sm:block">Explore the QFS Network</span>
+            <span className="hidden whitespace-nowrap text-[11px] text-cyan-400/90 sm:block">{t("Explore the QFS Network")}</span>
           </span>
         </button>
 
@@ -96,14 +99,14 @@ export function SiteHeader() {
                 key={item.id}
                 onClick={() => go(item.id)}
                 className={cn(
-                  "inline-flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-[13px] transition-colors",
+                  "inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg px-2.5 py-2 text-[13px] transition-colors",
                   active
                     ? "border border-blue-500/40 bg-blue-600/20 font-medium text-white"
                     : "border border-transparent text-slate-400 hover:bg-white/5 hover:text-slate-200"
                 )}
               >
                 <item.icon className="h-3.5 w-3.5" />
-                {item.nav}
+                {t(item.nav)}
               </button>
             );
           })}
@@ -115,19 +118,48 @@ export function SiteHeader() {
             <span className="leading-tight">
               <span className="block text-[13px] font-semibold text-white">QFS Polygon</span>
               <span className="flex items-center gap-1 text-[11px] text-emerald-400">
-                <OperativeDot /> Operational
+                <OperativeDot /> {t("Operational")}
               </span>
             </span>
           </div>
 
+          {/* selector de idioma */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[#1b2f63] px-2.5 text-[12px] font-semibold text-slate-300 transition-colors hover:bg-white/5"
+                aria-label={t("Language")}
+              >
+                <Globe className="h-4 w-4" />
+                <span className="hidden uppercase sm:inline">{lang}</span>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="border-[#1b2f63] bg-[#071132] text-slate-200">
+              {LANGS.map((l) => (
+                <DropdownMenuItem
+                  key={l.code}
+                  onClick={() => setLang(l.code)}
+                  className={cn(
+                    "gap-2.5",
+                    l.code === lang && "bg-blue-600/20 text-white"
+                  )}
+                >
+                  <span className="text-base leading-none">{l.flag}</span>
+                  <span className="flex-1">{l.label}</span>
+                  {l.dir === "rtl" && <span className="text-[10px] text-slate-500">RTL</span>}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* toggle tema claro/oscuro */}
           <button
             className="grid h-9 w-9 place-items-center rounded-lg border border-[#1b2f63] text-slate-300 transition-colors hover:bg-white/5"
-            onClick={() =>
-              toast({ title: "Dark theme locked", description: "QFS Explorer is optimized for a dark trading environment." })
-            }
-            aria-label="Theme"
+            onClick={toggleTheme}
+            aria-label={t("Theme")}
+            title={t("Theme")}
           >
-            <Sun className="h-4 w-4" />
+            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </button>
 
           {wallet ? (
@@ -141,32 +173,32 @@ export function SiteHeader() {
                     <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
                   </span>
                   <span className="mono hidden sm:inline">{`${wallet.slice(0, 6)}...${wallet.slice(-4)}`}</span>
-                  <span className="sm:hidden">Connected</span>
+                  <span className="sm:hidden">{t("Connected")}</span>
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="border-[#1b2f63] bg-[#071132] text-slate-200">
                 <div className="px-2.5 py-2">
-                  <div className="text-[10px] uppercase tracking-wider text-slate-500">Connected · QFS Polygon</div>
+                  <div className="text-[10px] uppercase tracking-wider text-slate-500">{t("Connected")} · QFS Polygon</div>
                   <div className="mono mt-0.5 text-[11px] text-emerald-400">{`${wallet.slice(0, 10)}...${wallet.slice(-6)}`}</div>
                 </div>
                 <DropdownMenuSeparator className="bg-[#1b2f63]" />
                 <DropdownMenuItem onClick={() => go("portfolio")} className="gap-2 focus:bg-blue-600/20 focus:text-white">
-                  <ChartPie className="h-4 w-4" /> Portfolio
-                  <span className="ml-auto text-[10px] text-slate-500">balances</span>
+                  <ChartPie className="h-4 w-4" /> {t("Portfolio")}
+                  <span className="ml-auto text-[10px] text-slate-500">{t("balances")}</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => go("tokens")} className="gap-2 focus:bg-blue-600/20 focus:text-white">
-                  <Wallet className="h-4 w-4" /> Watchlist
+                  <Wallet className="h-4 w-4" /> {t("Watchlist")}
                   <span className="ml-auto rounded bg-amber-500/15 px-1.5 text-[10px] font-semibold text-amber-400">{watchlist.length}</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={copyAddress} className="gap-2 focus:bg-blue-600/20 focus:text-white">
-                  <Copy className="h-4 w-4" /> Copy address
+                  <Copy className="h-4 w-4" /> {t("Copy address")}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator className="bg-[#1b2f63]" />
                 <DropdownMenuItem
                   onClick={toggleWallet}
                   className="gap-2 text-rose-400 focus:bg-rose-600/20 focus:text-rose-300"
                 >
-                  <LogOut className="h-4 w-4" /> Disconnect
+                  <LogOut className="h-4 w-4" /> {t("Disconnect")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -176,8 +208,8 @@ export function SiteHeader() {
               className="inline-flex h-9 shrink-0 items-center gap-2 whitespace-nowrap rounded-lg bg-blue-600 px-3.5 text-[13px] font-semibold text-white transition-colors hover:bg-blue-500"
             >
               <Wallet className="h-4 w-4" />
-              <span className="hidden sm:inline">Connect Wallet</span>
-              <span className="sm:hidden">Connect</span>
+              <span className="hidden sm:inline">{t("Connect Wallet")}</span>
+              <span className="sm:hidden">{t("Connect")}</span>
             </button>
           )}
         </div>
@@ -219,7 +251,7 @@ export function SiteHeader() {
                   )}
                 >
                   <item.icon className="h-4 w-4" />
-                  {item.side}
+                  {t(item.side)}
                 </button>
               ))}
             </nav>
@@ -233,7 +265,7 @@ export function SiteHeader() {
 /* ------------------------------ sidebar ------------------------------ */
 
 export function SideNav() {
-  const { view, go, wallet } = useExplorer();
+  const { view, go, wallet, t } = useExplorer();
   const items = NAV.filter((i) => !i.requiresWallet || wallet);
   return (
     <aside className="sticky top-16 hidden h-[calc(100vh-4rem)] w-[228px] shrink-0 flex-col border-r border-[#0f1e46] bg-[#050d24] lg:flex">
@@ -245,14 +277,14 @@ export function SideNav() {
               key={item.id}
               onClick={() => go(item.id)}
               className={cn(
-                "flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-[13px] transition-colors",
+                "flex w-full items-center gap-2.5 whitespace-nowrap rounded-lg px-3 py-2.5 text-[13px] transition-colors",
                 active
                   ? "border border-blue-500/30 bg-gradient-to-r from-blue-600/25 to-blue-500/5 font-medium text-white"
                   : "border border-transparent text-slate-400 hover:bg-white/5 hover:text-slate-200"
               )}
             >
               <item.icon className={cn("h-4 w-4", active && "text-blue-400")} />
-              {item.side}
+              {t(item.side)}
               {active && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-blue-400" />}
             </button>
           );
@@ -262,9 +294,9 @@ export function SideNav() {
       <div className="p-3">
         <div className="qfs-card relative overflow-hidden p-4 text-center">
           <Coin size={54} className="mx-auto" />
-          <div className="mt-3 text-[13px] font-bold text-white">The Future of Digital Finance</div>
+          <div className="mt-3 text-[13px] font-bold text-white">{t("The Future of Digital Finance")}</div>
           <div className="mt-1 text-[10px] tracking-wide text-slate-500">
-            Fast • Secure • Decentralized
+            {t("Fast • Secure • Decentralized")}
           </div>
           <div className="relative mt-3 flex justify-center">
             <div className="globe-sm h-20 w-20" />

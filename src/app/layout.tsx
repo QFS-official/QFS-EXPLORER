@@ -23,13 +23,19 @@ export const metadata: Metadata = {
   },
 };
 
+// Applies persisted theme + language before first paint (no flash of wrong theme)
+const themeBoot = `(function(){try{var t=localStorage.getItem("qfs-theme");var l=localStorage.getItem("qfs-lang");var r=document.documentElement;r.classList.remove("dark","light");r.classList.add(t==="light"?"light":"dark");if(l){r.lang=l;if(l==="ar"){r.dir="rtl"}else{r.dir="ltr"}}}catch(e){}})();`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
+    <html lang="en" dir="ltr" className="dark" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeBoot }} />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#030816] text-slate-200`}
       >

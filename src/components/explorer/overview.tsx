@@ -68,10 +68,10 @@ import { cn } from "@/lib/utils";
 /* -------------------------------- hero ------------------------------- */
 
 const POPULAR = [
-  { label: "QFS Token", q: "QFS" },
-  { label: short(TOKENS[0].address, 14, 4) + "...", q: TOKENS[0].address },
-  { label: "Latest Blocks", q: "" },
-  { label: "Top Wallets", q: "" },
+  { key: "QFS Token", q: "QFS" },
+  { key: short(TOKENS[0].address, 14, 4) + "...", q: TOKENS[0].address },
+  { key: "Latest Blocks", q: "" },
+  { key: "Top Wallets", q: "" },
 ];
 
 function HeroRow({
@@ -85,14 +85,14 @@ function HeroRow({
 }) {
   return (
     <div className="flex items-center gap-2 text-slate-400">
-      {icon} {label}:
+      {icon} {label}
       <span className="ml-auto font-medium text-slate-200">{children}</span>
     </div>
   );
 }
 
 export function Hero() {
-  const { search, go, openDetail } = useExplorer();
+  const { search, go, openDetail, t } = useExplorer();
   const [q, setQ] = React.useState("");
 
   const submit = (e?: React.FormEvent) => {
@@ -101,12 +101,16 @@ export function Hero() {
     search(q);
   };
 
-  const onChip = (label: string) => {
-    if (label === "Latest Blocks") return go("blocks");
-    if (label === "Top Wallets") return go("addresses");
-    if (label.startsWith("0x")) return openDetail({ kind: "address", address: TOKENS[0].address });
-    search(label);
+  const onChip = (p: (typeof POPULAR)[number]) => {
+    if (p.key === "Latest Blocks") return go("blocks");
+    if (p.key === "Top Wallets") return go("addresses");
+    if (p.q.startsWith("0x")) return openDetail({ kind: "address", address: TOKENS[0].address });
+    if (p.q) return search(p.q);
+    search(p.key);
   };
+
+  const chipLabel = (p: (typeof POPULAR)[number]) =>
+    p.q === "QFS" ? t("QFS Token") : p.key === "Latest Blocks" ? t("Latest Blocks") : p.key === "Top Wallets" ? t("Top Wallets") : p.key;
 
   return (
     <section className="hero-space relative overflow-hidden rounded-2xl border border-[#1b3067]">
@@ -159,14 +163,13 @@ export function Hero() {
             </a>
           </div>
           <div className="mb-2 flex items-center gap-2 text-[11px] font-semibold tracking-[0.32em] text-cyan-400">
-            <Sparkles className="h-3.5 w-3.5" /> QFS NETWORK <Sparkles className="h-3.5 w-3.5" />
+            <Sparkles className="h-3.5 w-3.5" /> {t("QFS NETWORK")} <Sparkles className="h-3.5 w-3.5" />
           </div>
           <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-5xl">
             QFS Explorer
           </h1>
           <p className="mt-2.5 max-w-xl text-sm text-slate-400 sm:text-[15px]">
-            Explore transactions, wallets, tokens, contracts and network activity on the QFS
-            blockchain.
+            {t("Explore transactions, wallets, tokens, contracts and network activity on the QFS blockchain.")}
           </p>
 
           <form onSubmit={submit} className="mt-5 flex max-w-xl items-center gap-2" role="search">
@@ -175,7 +178,7 @@ export function Hero() {
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
-                placeholder="Search by Address / Transaction Hash / Block / Token / Contract"
+                placeholder={t("Search by Address / Transaction Hash / Block / Token / Contract")}
                 className="h-11 w-full rounded-full border border-[#22407f] bg-[#060f2d]/90 pl-10 pr-4 text-[13px] text-slate-100 placeholder:text-slate-500 focus:border-blue-500/70 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
                 aria-label="Search the QFS blockchain"
               />
@@ -184,19 +187,19 @@ export function Hero() {
               type="submit"
               className="inline-flex h-11 shrink-0 items-center gap-2 rounded-full bg-blue-600 px-5 text-sm font-semibold text-white shadow-lg shadow-blue-950/50 transition-colors hover:bg-blue-500"
             >
-              <Search className="h-4 w-4" /> Search
+              <Search className="h-4 w-4" /> {t("Search")}
             </button>
           </form>
 
           <div className="mt-4 flex flex-wrap items-center gap-2 text-xs">
-            <span className="text-slate-500">Popular:</span>
+            <span className="text-slate-500">{t("Popular:")}</span>
             {POPULAR.map((p) => (
               <button
-                key={p.label}
-                onClick={() => onChip(p.label === "QFS Token" ? "QFS" : p.label)}
+                key={p.key}
+                onClick={() => onChip(p)}
                 className="rounded-full border border-[#22407f] bg-[#0a1638]/80 px-3 py-1 text-[11px] text-slate-300 transition-colors hover:border-blue-500/60 hover:text-white"
               >
-                {p.label}
+                {chipLabel(p)}
               </button>
             ))}
           </div>
@@ -212,7 +215,7 @@ export function Hero() {
             {/* Red actual */}
             <div className="qfs-card w-full p-4">
               <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
-                Current Network
+                {t("Current Network")}
               </div>
               <div className="mt-2 flex items-center gap-3">
                 <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-violet-500 to-blue-600 shadow-lg shadow-blue-950/40">
@@ -221,24 +224,24 @@ export function Hero() {
                 <div>
                   <div className="text-sm font-semibold text-white">QFS Polygon</div>
                   <div className="flex items-center gap-1.5 text-[11px] text-emerald-400">
-                    <OperativeDot /> Operational
+                    <OperativeDot /> {t("Operational")}
                   </div>
                 </div>
               </div>
               <div className="mt-3 space-y-2 text-[12px]">
-                <HeroRow icon={<Globe className="h-3.5 w-3.5 text-blue-400" />} label="Network">
+                <HeroRow icon={<Globe className="h-3.5 w-3.5 text-blue-400" />} label={t("Network:")}>
                   Polygon PoS
                 </HeroRow>
-                <HeroRow icon={<Hash className="h-3.5 w-3.5 text-blue-400" />} label="Chain ID">
+                <HeroRow icon={<Hash className="h-3.5 w-3.5 text-blue-400" />} label={t("Chain ID:")}>
                   137
                 </HeroRow>
-                <HeroRow icon={<CircleDollarSign className="h-3.5 w-3.5 text-blue-400" />} label="Asset">
+                <HeroRow icon={<CircleDollarSign className="h-3.5 w-3.5 text-blue-400" />} label={t("Asset:")}>
                   QFS
                 </HeroRow>
-                <HeroRow icon={<ShieldCheck className="h-3.5 w-3.5 text-blue-400" />} label="Standard">
+                <HeroRow icon={<ShieldCheck className="h-3.5 w-3.5 text-blue-400" />} label={t("Standard:")}>
                   ERC-20
                 </HeroRow>
-                <HeroRow icon={<Link2 className="h-3.5 w-3.5 text-blue-400" />} label="Contract">
+                <HeroRow icon={<Link2 className="h-3.5 w-3.5 text-blue-400" />} label={t("Contract:")}>
                   <button
                     onClick={() => openDetail({ kind: "address", address: TOKENS[0].address })}
                     title={TOKENS[0].address}
@@ -253,7 +256,7 @@ export function Hero() {
             {/* Red futura */}
             <div className="qfs-card w-full p-4" style={{ borderStyle: "dashed" }}>
               <div className="text-[10px] font-semibold uppercase tracking-wider text-amber-500/80">
-                Future Network
+                {t("Future Network")}
               </div>
               <div className="mt-2 flex items-center gap-3">
                 <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-amber-400 to-orange-600 shadow-lg shadow-amber-950/40">
@@ -262,19 +265,19 @@ export function Hero() {
                 <div>
                   <div className="text-sm font-semibold text-white">QFS Reserve Network</div>
                   <div className="flex items-center gap-1.5 text-[11px] text-amber-400">
-                    <DevDot /> In Development
+                    <DevDot /> {t("In Development")}
                   </div>
                 </div>
               </div>
               <div className="mt-3 space-y-2 text-[12px]">
-                <HeroRow icon={<Activity className="h-3.5 w-3.5 text-amber-400" />} label="Status">
-                  <span className="text-amber-400">Development</span>
+                <HeroRow icon={<Activity className="h-3.5 w-3.5 text-amber-400" />} label={t("Status:")}>
+                  <span className="text-amber-400">{t("Development")}</span>
                 </HeroRow>
-                <HeroRow icon={<CircleDollarSign className="h-3.5 w-3.5 text-amber-400" />} label="Native Asset">
+                <HeroRow icon={<CircleDollarSign className="h-3.5 w-3.5 text-amber-400" />} label={t("Native Asset:")}>
                   QFS
                 </HeroRow>
-                <HeroRow icon={<Globe className="h-3.5 w-3.5 text-amber-400" />} label="Blockchain">
-                  <span className="italic text-slate-400">Coming Soon</span>
+                <HeroRow icon={<Globe className="h-3.5 w-3.5 text-amber-400" />} label={t("Blockchain:")}>
+                  <span className="italic text-slate-400">{t("Coming Soon")}</span>
                 </HeroRow>
               </div>
               <LaunchProgress className="mt-3 border-t border-[#16295c]/70 pt-3" />
@@ -311,7 +314,7 @@ function StatCard({
 }
 
 function StatsRow() {
-  const { blocks, tick, totalTx } = useExplorer();
+  const { blocks, tick, totalTx, t } = useExplorer();
   const latest = blocks[0];
   const gasSpark = React.useMemo(() => sparkSeries(7, 20, 0.6), []);
   const blockSpark = React.useMemo(() => sparkSeries(11, 20, 0.8), []);
@@ -320,7 +323,7 @@ function StatsRow() {
 
   return (
     <div className="grid grid-cols-2 gap-3.5 md:grid-cols-3 xl:grid-cols-5">
-      <StatCard label="Latest Block" icon={<Box className="h-4 w-4" />}>
+      <StatCard label={t("Latest Block")} icon={<Box className="h-4 w-4" />}>
         <div className="mt-2.5 text-[19px] font-bold leading-tight text-white">
           {fmt(latest.number)}
         </div>
@@ -333,7 +336,7 @@ function StatsRow() {
         </div>
       </StatCard>
 
-      <StatCard label="Total Transactions" icon={<ArrowLeftRight className="h-4 w-4" />}>
+      <StatCard label={t("Total Transactions")} icon={<ArrowLeftRight className="h-4 w-4" />}>
         <div className="mt-2.5 text-[19px] font-bold leading-tight text-white">{fmt(totalTx)}</div>
         <div className="mt-1 flex items-center justify-between gap-1">
           <Delta value={12.6} className="mt-0.5" />
@@ -341,7 +344,7 @@ function StatsRow() {
         </div>
       </StatCard>
 
-      <StatCard label="Active Wallets" icon={<Users className="h-4 w-4" />}>
+      <StatCard label={t("Active Wallets")} icon={<Users className="h-4 w-4" />}>
         <div className="mt-2.5 text-[19px] font-bold leading-tight text-white">
           {fmt(CHAIN.activeWallets)}
         </div>
@@ -351,7 +354,7 @@ function StatsRow() {
         </div>
       </StatCard>
 
-      <StatCard label="QFS Supply" icon={<CircleDollarSign className="h-4 w-4" />}>
+      <StatCard label={t("QFS Supply")} icon={<CircleDollarSign className="h-4 w-4" />}>
         <div className="mt-2.5 flex items-baseline gap-1.5">
           <span className="truncate text-[16px] font-bold leading-tight text-white 2xl:text-[19px]">
             {fmt(CHAIN.supply)}
@@ -369,7 +372,7 @@ function StatsRow() {
         </div>
       </StatCard>
 
-      <StatCard label="Gas Price" icon={<Fuel className="h-4 w-4" />}>
+      <StatCard label={t("Gas Price")} icon={<Fuel className="h-4 w-4" />}>
         <div className="mt-2.5 flex items-baseline gap-1.5">
           <span className="text-[17px] font-bold leading-tight text-white">{CHAIN.gas}</span>
           <span className="text-[11px] font-medium text-slate-400">POL</span>
@@ -391,12 +394,13 @@ function StatsRow() {
 const RANGES = ["1H", "24H", "7D", "30D"] as const;
 
 function ActivityCard() {
+  const { t } = useExplorer();
   const [range, setRange] = React.useState<(typeof RANGES)[number]>("24H");
   const data = React.useMemo(() => activitySeries(range), [range]);
 
   return (
     <Panel
-      title="Network Activity"
+      title={t("Network Activity")}
       icon={<Activity className="h-4 w-4" />}
       className="xl:col-span-6"
       bodyClassName="p-4 pt-2"
@@ -460,7 +464,7 @@ function ActivityCard() {
               yAxisId="l"
               type="monotone"
               dataKey="tx"
-              name="Transactions"
+              name={t("Transactions")}
               stroke="#3b82f6"
               strokeWidth={2}
               fill="url(#gTx)"
@@ -469,7 +473,7 @@ function ActivityCard() {
               yAxisId="r"
               type="monotone"
               dataKey="addr"
-              name="Active Addresses"
+              name={t("Active Addresses")}
               stroke="#a855f7"
               strokeWidth={2}
               fill="url(#gAddr)"
@@ -479,10 +483,10 @@ function ActivityCard() {
       </div>
       <div className="mt-1 flex items-center gap-4 text-[11px] text-slate-400">
         <span className="flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-blue-500" /> Transactions
+          <span className="h-2 w-2 rounded-full bg-blue-500" /> {t("Transactions")}
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-purple-500" /> Active Addresses
+          <span className="h-2 w-2 rounded-full bg-purple-500" /> {t("Active Addresses")}
         </span>
       </div>
     </Panel>
@@ -492,10 +496,11 @@ function ActivityCard() {
 /* ------------------------- token distribution ------------------------ */
 
 function DistributionCard() {
+  const { t } = useExplorer();
   const data = TOKENS.map((t) => ({ name: t.symbol, value: t.share, color: t.distColor }));
   return (
     <Panel
-      title="Token Distribution"
+      title={t("Token Distribution")}
       icon={<ChartPie className="h-4 w-4" />}
       className="xl:col-span-3"
     >
@@ -523,7 +528,7 @@ function DistributionCard() {
         <div className="pointer-events-none absolute inset-0 grid place-items-center">
           <div className="text-center">
             <div className="text-base font-bold text-white">100B</div>
-            <div className="text-[10px] text-slate-500">Total Supply</div>
+            <div className="text-[10px] text-slate-500">{t("Total Supply")}</div>
           </div>
         </div>
       </div>
@@ -565,11 +570,11 @@ function StatusRow({
 }
 
 function NetworkStatusCard() {
-  const { blocks, tick, totalTx } = useExplorer();
+  const { blocks, tick, totalTx, t } = useExplorer();
   const latest = blocks[0];
   return (
     <Panel
-      title="Network Status"
+      title={t("Network Status")}
       icon={<Server className="h-4 w-4" />}
       className="xl:col-span-3 xl:row-span-2"
       right={<StatusBadge />}
@@ -577,28 +582,28 @@ function NetworkStatusCard() {
       <div>
         <StatusRow
           icon={<Globe className="h-3.5 w-3.5" />}
-          label="Network"
+          label={t("Network:")}
           valueNode={
             <span className="flex items-center gap-1.5 text-emerald-400">
               <OperativeDot /> Polygon PoS
             </span>
           }
         />
-        <StatusRow icon={<Box className="h-3.5 w-3.5" />} label="Block Height" value={fmt(latest.number)} />
+        <StatusRow icon={<Box className="h-3.5 w-3.5" />} label={t("Block Height")} value={fmt(latest.number)} />
         <StatusRow
           icon={<RefreshCw className="h-3.5 w-3.5" />}
-          label="Latest Block"
+          label={t("Latest Block")}
           value={timeAgo(latest.offset + (tick - latest.atTick))}
         />
-        <StatusRow icon={<ArrowLeftRight className="h-3.5 w-3.5" />} label="Transactions" value={fmtCompact(totalTx)} />
-        <StatusRow icon={<Users className="h-3.5 w-3.5" />} label="Active Addresses" value={fmtCompact(CHAIN.activeWallets)} />
-        <StatusRow icon={<Repeat className="h-3.5 w-3.5" />} label="Token Transfers" value={fmtCompact(CHAIN.tokenTransfers)} />
-        <StatusRow icon={<Hash className="h-3.5 w-3.5" />} label="Chain ID" value="137" />
-        <StatusRow icon={<CircleDollarSign className="h-3.5 w-3.5" />} label="Asset" value="QFS" />
-        <StatusRow icon={<ShieldCheck className="h-3.5 w-3.5" />} label="Standard" value="ERC-20" />
+        <StatusRow icon={<ArrowLeftRight className="h-3.5 w-3.5" />} label={t("Transactions")} value={fmtCompact(totalTx)} />
+        <StatusRow icon={<Users className="h-3.5 w-3.5" />} label={t("Active Addresses")} value={fmtCompact(CHAIN.activeWallets)} />
+        <StatusRow icon={<Repeat className="h-3.5 w-3.5" />} label={t("Token Transfers")} value={fmtCompact(CHAIN.tokenTransfers)} />
+        <StatusRow icon={<Hash className="h-3.5 w-3.5" />} label={t("Chain ID:")} value="137" />
+        <StatusRow icon={<CircleDollarSign className="h-3.5 w-3.5" />} label={t("Asset:")} value="QFS" />
+        <StatusRow icon={<ShieldCheck className="h-3.5 w-3.5" />} label={t("Standard:")} value="ERC-20" />
         <StatusRow
           icon={<Server className="h-3.5 w-3.5" />}
-          label="RPC Endpoint"
+          label={t("RPC Endpoint")}
           valueNode={<span className="mono text-[11px] text-blue-400">https://polygon-rpc.com</span>}
         />
       </div>
@@ -609,10 +614,10 @@ function NetworkStatusCard() {
 /* ---------------------------- latest blocks -------------------------- */
 
 function LatestBlocks() {
-  const { blocks, tick, openDetail, go } = useExplorer();
+  const { blocks, tick, openDetail, go, t } = useExplorer();
   return (
     <Panel
-      title="Latest Blocks"
+      title={t("Latest Blocks")}
       icon={<Box className="h-4 w-4" />}
       className="xl:col-span-4"
       right={<ViewAllBtn onClick={() => go("blocks")} />}
@@ -622,10 +627,10 @@ function LatestBlocks() {
         <table className="w-full min-w-[440px] text-left text-[13px]">
           <thead>
             <tr className="border-b border-[#122451]/70 text-[11px] uppercase tracking-wide text-slate-500">
-              <th className="px-4 py-2 font-medium">Block #</th>
-              <th className="px-3 py-2 font-medium">Timestamp</th>
-              <th className="px-3 py-2 font-medium">Transactions</th>
-              <th className="px-4 py-2 font-medium">Mined By</th>
+              <th className="px-4 py-2 font-medium">{t("Block #")}</th>
+              <th className="px-3 py-2 font-medium">{t("Timestamp")}</th>
+              <th className="px-3 py-2 font-medium">{t("Transactions")}</th>
+              <th className="px-4 py-2 font-medium">{t("Mined By")}</th>
             </tr>
           </thead>
           <tbody>
@@ -657,10 +662,10 @@ function LatestBlocks() {
 /* -------------------------- latest transactions ---------------------- */
 
 function LatestTxs() {
-  const { txs, tick, openDetail, go } = useExplorer();
+  const { txs, tick, openDetail, go, t: tr } = useExplorer();
   return (
     <Panel
-      title="Latest Transactions"
+      title={tr("Latest Transactions")}
       icon={<ArrowLeftRight className="h-4 w-4" />}
       className="xl:col-span-5"
       right={<ViewAllBtn onClick={() => go("transactions")} />}
@@ -670,11 +675,11 @@ function LatestTxs() {
         <table className="w-full min-w-[520px] text-left text-[13px]">
           <thead>
             <tr className="border-b border-[#122451]/70 text-[11px] uppercase tracking-wide text-slate-500">
-              <th className="px-4 py-2 font-medium">Tx Hash</th>
-              <th className="px-3 py-2 font-medium">From</th>
-              <th className="px-3 py-2 font-medium">To</th>
-              <th className="px-3 py-2 text-right font-medium">Amount</th>
-              <th className="px-4 py-2 text-right font-medium">Time</th>
+              <th className="px-4 py-2 font-medium">{tr("Tx Hash")}</th>
+              <th className="px-3 py-2 font-medium">{tr("From")}</th>
+              <th className="px-3 py-2 font-medium">{tr("To")}</th>
+              <th className="px-3 py-2 text-right font-medium">{tr("Amount")}</th>
+              <th className="px-4 py-2 text-right font-medium">{tr("Time")}</th>
             </tr>
           </thead>
           <tbody>
@@ -721,10 +726,10 @@ function LatestTxs() {
 /* ------------------------------ top tokens --------------------------- */
 
 function TopTokens() {
-  const { go, openDetail } = useExplorer();
+  const { go, openDetail, t: tr } = useExplorer();
   return (
     <Panel
-      title="Top Tokens by Holders"
+      title={tr("Top Tokens by Holders")}
       icon={<ChartPie className="h-4 w-4" />}
       className="xl:col-span-9"
       bodyClassName="p-0"
@@ -734,11 +739,11 @@ function TopTokens() {
         <table className="w-full min-w-[520px] text-left text-[13px]">
           <thead>
             <tr className="border-b border-[#122451]/70 text-[11px] uppercase tracking-wide text-slate-500">
-              <th className="px-4 py-2 font-medium">Token</th>
-              <th className="px-3 py-2 font-medium">Price</th>
-              <th className="px-3 py-2 font-medium">Holders</th>
-              <th className="px-3 py-2 font-medium">Transfers</th>
-              <th className="px-4 py-2 font-medium">Network</th>
+              <th className="px-4 py-2 font-medium">{tr("Token")}</th>
+              <th className="px-3 py-2 font-medium">{tr("Price")}</th>
+              <th className="px-3 py-2 font-medium">{tr("Holders")}</th>
+              <th className="px-3 py-2 font-medium">{tr("Transfers")}</th>
+              <th className="px-4 py-2 font-medium">{tr("Network")}</th>
             </tr>
           </thead>
           <tbody>
@@ -776,7 +781,7 @@ function TopTokens() {
 /* ----------------------------- verify promo -------------------------- */
 
 function VerifyPromo() {
-  const { go } = useExplorer();
+  const { go, t } = useExplorer();
   return (
     <div className="qfs-card relative overflow-hidden p-4 xl:col-span-3">
       <div className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full bg-blue-600/25 blur-2xl" />
@@ -785,9 +790,9 @@ function VerifyPromo() {
           <ShieldCheck className="h-5 w-5" />
         </IconBox>
         <div>
-          <div className="text-sm font-semibold text-white">Verify Contracts</div>
+          <div className="text-sm font-semibold text-white">{t("Verify Contracts")}</div>
           <p className="mt-1 text-xs leading-relaxed text-slate-400">
-            Check official contracts and avoid scams.
+            {t("Check official contracts and avoid scams.")}
           </p>
         </div>
       </div>
@@ -795,7 +800,7 @@ function VerifyPromo() {
         onClick={() => go("verification")}
         className="mt-3.5 inline-flex h-9 w-full items-center justify-center gap-2 rounded-lg bg-blue-600 text-[13px] font-semibold text-white transition-colors hover:bg-blue-500"
       >
-        Go to Verification <ArrowRight className="h-4 w-4" />
+        {t("Go to Verification")} <ArrowRight className="h-4 w-4" />
       </button>
     </div>
   );

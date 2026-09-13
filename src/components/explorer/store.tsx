@@ -13,6 +13,9 @@ import {
   parseSearch,
   Tx,
 } from "@/lib/explorer";
+import { isLang, LANGS, translate, type Lang, type TFunc } from "@/lib/i18n";
+
+export type Theme = "dark" | "light";
 
 export type View =
   | "overview"
@@ -50,6 +53,11 @@ interface ExplorerCtx {
   watchlist: string[];
   toggleWatch: (symbol: string) => void;
   search: (q: string) => void;
+  theme: Theme;
+  toggleTheme: () => void;
+  lang: Lang;
+  setLang: (l: Lang) => void;
+  t: TFunc;
 }
 
 const Ctx = React.createContext<ExplorerCtx | null>(null);
@@ -72,6 +80,60 @@ export function ExplorerProvider({ children }: { children: React.ReactNode }) {
   const [totalTx, setTotalTx] = React.useState(CHAIN.totalTxStart);
   const [wallet, setWallet] = React.useState<string | null>(null);
   const [watchlist, setWatchlist] = React.useState<string[]>([]);
+  const [theme, setTheme] = React.useState<Theme>("dark");
+  const [lang, setLangState] = React.useState<Lang>("en");
+
+  // Load persisted theme + language after mount (avoids SSR hydration mismatch).
+  // The inline script in layout.tsx already applied html class/dir before paint.
+  React.useEffect(() => {
+    try {
+      const t = window.localStorage.getItem("qfs-theme");
+      if (t === "light" || t === "dark") setTheme(t);
+      const l = window.localStorage.getItem("qfs-lang");
+      if (isLang(l)) setLangState(l);
+    } catch {
+      /* ignore corrupt storage */
+    }
+  }, []);
+
+  // Apply theme + lang/dir to <html> whenever they change
+  React.useEffect(() => {
+    const root = document.documentElement;
+    root.classList.toggle("dark", theme === "dark");
+    root.classList.toggle("light", theme === "light");
+  }, [theme]);
+
+  React.useEffect(() => {
+    const root = document.documentElement;
+    const meta = LANGS.find((l) => l.code === lang);
+    root.lang = lang;
+    root.dir = meta?.dir ?? "ltr";
+  }, [lang]);
+
+  const setThemePersist = React.useCallback((t: Theme) => {
+    setTheme(t);
+    try {
+      window.localStorage.setItem("qfs-theme", t);
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  const toggleTheme = React.useCallback(
+    () => setThemePersist(theme === "dark" ? "light" : "dark"),
+    [theme, setThemePersist]
+  );
+
+  const setLang = React.useCallback((l: Lang) => {
+    setLangState(l);
+    try {
+      window.localStorage.setItem("qfs-lang", l);
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  const t = React.useCallback<TFunc>((key) => translate(lang, key), [lang]);
 
   // Load persisted watchlist after mount (avoids SSR hydration mismatch)
   React.useEffect(() => {
@@ -221,8 +283,13 @@ export function ExplorerProvider({ children }: { children: React.ReactNode }) {
       watchlist,
       toggleWatch,
       search,
+      theme,
+      toggleTheme,
+      lang,
+      setLang,
+      t,
     }),
-    [view, go, detail, openDetail, closeDetail, tick, blocks, txs, totalTx, wallet, toggleWallet, watchlist, toggleWatch, search]
+    [view, go, detail, openDetail, closeDetail, tick, blocks, txs, totalTx, wallet, toggleWallet, watchlist, toggleWatch, search, theme, toggleTheme, lang, setLang, t]
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

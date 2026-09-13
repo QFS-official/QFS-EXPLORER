@@ -4,6 +4,7 @@ import * as React from "react";
 import { Area, AreaChart, ResponsiveContainer } from "recharts";
 import { cn } from "@/lib/utils";
 import { launchProgress, RESERVE_LAUNCH, TOKENS, TokenStatic } from "@/lib/explorer";
+import { useExplorer } from "./store";
 
 /* ------------------------------- logos ------------------------------ */
 
@@ -88,10 +89,11 @@ export function OperativeDot({ className }: { className?: string }) {
   return <span className={cn("pulse-dot inline-block h-2 w-2 rounded-full bg-emerald-400", className)} />;
 }
 
-export function StatusBadge({ text = "Operational" }: { text?: string }) {
+export function StatusBadge({ text }: { text?: string }) {
+  const { t } = useExplorer();
   return (
     <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-medium text-emerald-400">
-      <OperativeDot /> {text}
+      <OperativeDot /> {text ?? t("Operational")}
     </span>
   );
 }
@@ -101,19 +103,21 @@ export function DevDot({ className }: { className?: string }) {
 }
 
 export function DevBadge() {
+  const { t } = useExplorer();
   return (
     <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-0.5 text-[11px] font-medium text-amber-400">
-      <DevDot /> In Development
+      <DevDot /> {t("In Development")}
     </span>
   );
 }
 
 export function LaunchProgress({ className }: { className?: string }) {
   const { pct, daysLeft } = launchProgress();
+  const { t } = useExplorer();
   return (
     <div className={className}>
       <div className="flex items-center justify-between text-[11px]">
-        <span className="text-slate-400">Launch Progress</span>
+        <span className="text-slate-400">{t("Launch Progress")}</span>
         <span className="font-semibold text-amber-400">{pct.toFixed(1)}%</span>
       </div>
       <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-[#0a1638] ring-1 ring-inset ring-[#22407f]/60">
@@ -124,10 +128,10 @@ export function LaunchProgress({ className }: { className?: string }) {
       </div>
       <div className="mt-1.5 flex items-center justify-between text-[10px] text-slate-500">
         <span>
-          Target: <span className="text-slate-300">{RESERVE_LAUNCH.targetLabel}</span>
+          {t("Target")}: <span className="text-slate-300">{RESERVE_LAUNCH.targetLabel}</span>
         </span>
         <span>
-          <span className="font-medium text-amber-400/90">{daysLeft}</span> days left
+          <span className="font-medium text-amber-400/90">{daysLeft}</span> {t("days left")}
         </span>
       </div>
     </div>
@@ -256,12 +260,13 @@ export function Panel({
 }
 
 export function ViewAllBtn({ onClick }: { onClick: () => void }) {
+  const { t } = useExplorer();
   return (
     <button
       onClick={onClick}
       className="inline-flex items-center gap-1 text-xs font-medium text-blue-400 transition-colors hover:text-blue-300"
     >
-      View All <span aria-hidden>→</span>
+      {t("View All")} <span aria-hidden>→</span>
     </button>
   );
 }
