@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
@@ -13,13 +13,43 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+export const viewport: Viewport = {
+  themeColor: "#001438",
+};
+
 export const metadata: Metadata = {
+  metadataBase: new URL("https://explorer.qfspay.org"),
   title: "QFS Explorer | Explore the QFS Network",
   description:
     "Explore transactions, wallets, tokens, contracts and network activity on the QFS blockchain.",
   keywords: ["QFS", "Explorer", "Blockchain", "Polygon", "Transactions", "Tokens"],
+  manifest: "/manifest.json",
   icons: {
-    icon: "https://z-cdn.chatglm.cn/z-ai/static/logo.svg",
+    icon: [
+      { url: "/favicon.ico", sizes: "any", type: "image/x-icon" },
+      { url: "/favicon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon-16.png", sizes: "16x16", type: "image/png" },
+      { url: "/icon-48.png", sizes: "48x48", type: "image/png" },
+      { url: "/icon-96.png", sizes: "96x96", type: "image/png" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
+  openGraph: {
+    title: "QFS Explorer | Explore the QFS Network",
+    description:
+      "Explore transactions, wallets, tokens, contracts and network activity on the QFS blockchain.",
+    url: "https://explorer.qfspay.org",
+    siteName: "QFS Explorer",
+    images: [{ url: "/qfs-logo.png", width: 1254, height: 1254, alt: "QFS Explorer" }],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "QFS Explorer | Explore the QFS Network",
+    description:
+      "Explore transactions, wallets, tokens, contracts and network activity on the QFS blockchain.",
+    images: ["/qfs-logo.png"],
   },
 };
 
