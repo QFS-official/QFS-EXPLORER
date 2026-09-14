@@ -8,56 +8,29 @@ import { useExplorer } from "./store";
 
 /* ------------------------------- logos ------------------------------ */
 
-export function Coin({ size = 40, className }: { size?: number; className?: string }) {
+const BRAND_SYMBOL = "/qfs-symbol.png";
+
+function BrandMark({ size = 40, className, glow = "rgba(56,132,255,.45)" }: { size?: number; className?: string; glow?: string }) {
   return (
-    <div
-      className={cn(
-        "relative shrink-0 rounded-full grid place-items-center font-extrabold text-[#5b3a00] select-none",
-        className
-      )}
-      style={{
-        width: size,
-        height: size,
-        background:
-          "radial-gradient(circle at 32% 28%, #ffe9a8 0%, #f7c948 38%, #d99a1b 72%, #a86f08 100%)",
-        boxShadow:
-          "inset 0 -2px 6px rgba(120,70,0,.55), inset 0 2px 4px rgba(255,255,220,.8), 0 2px 12px rgba(247,201,72,.35)",
-        fontSize: size * 0.24,
-      }}
+    <img
+      src={BRAND_SYMBOL}
+      alt=""
+      width={size}
+      height={size}
+      draggable={false}
+      className={cn("shrink-0 select-none object-contain", className)}
+      style={{ width: size, height: size, filter: `drop-shadow(0 2px 8px ${glow})` }}
       aria-hidden
-    >
-      <span className="tracking-tight">QFS</span>
-    </div>
+    />
   );
 }
 
+export function Coin({ size = 40, className }: { size?: number; className?: string }) {
+  return <BrandMark size={size} className={className} />;
+}
+
 export function HexGlyph({ size = 36, className }: { size?: number; className?: string }) {
-  const id = React.useId().replace(/[:]/g, "");
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 48 48"
-      fill="none"
-      className={className}
-      aria-hidden
-    >
-      <defs>
-        <linearGradient id={`g1-${id}`} x1="0" y1="0" x2="48" y2="48">
-          <stop stopColor="#a78bfa" />
-          <stop offset="1" stopColor="#3b82f6" />
-        </linearGradient>
-      </defs>
-      <path
-        d="M24 4 41 14v20L24 44 7 34V14L24 4Z"
-        stroke={`url(#g1-${id})`}
-        strokeWidth="3"
-        strokeLinejoin="round"
-      />
-      <path d="M24 13.5 33 19v10l-9 5.5L15 29V19l9-5.5Z" fill={`url(#g1-${id})`} opacity="0.92" />
-      <path d="M24 19.5l4.4 2.6v5.2L24 30l-4.4-2.7v-5.2L24 19.5Z" fill="#0b1233" />
-    </svg>
-  );
+  return <BrandMark size={size} className={className} glow="rgba(56,132,255,.35)" />;
 }
 
 export function TokenIcon({ token, size = 28 }: { token: TokenStatic; size?: number }) {
